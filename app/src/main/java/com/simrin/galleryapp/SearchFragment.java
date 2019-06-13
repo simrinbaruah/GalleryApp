@@ -89,7 +89,6 @@ public class SearchFragment extends Fragment {
 
             @Override
             public void onFailure(Call<PhotoList> call, Throwable t) {
-                Toast.makeText(getActivity(), "error", Toast.LENGTH_SHORT).show();
             }
         });
     }

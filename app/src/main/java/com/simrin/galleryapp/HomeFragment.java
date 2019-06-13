@@ -1,15 +1,21 @@
 package com.simrin.galleryapp;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -32,6 +38,8 @@ public class HomeFragment extends Fragment{
     private int viewThreshold=20;
     private int pageNumber = 1;
     private ProgressBar progressBar;
+    private Snackbar snackbar;
+    private RelativeLayout relativeLayout;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -41,13 +49,15 @@ public class HomeFragment extends Fragment{
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         recyclerView = getView().findViewById(R.id.recyclerview);
         progressBar = getView().findViewById(R.id.progress);
+        relativeLayout = getView().findViewById(R.id.relativeLayout);
         PhotoUrls = new ArrayList<>();
+//        if(isNetworkAvailable() == false){
+//            showSnackBar("Intenet Not There", relativeLayout);
+//        }
         getPhotos(String.valueOf(pageNumber));
     }
-
 
     private void getPhotos(String page){
         progressBar.setVisibility(View.VISIBLE);
@@ -76,7 +86,6 @@ public class HomeFragment extends Fragment{
 
             @Override
             public void onFailure(Call<PhotoList> call, Throwable t) {
-                Toast.makeText(getActivity(), "error", Toast.LENGTH_SHORT).show();
             }
         });
     }
