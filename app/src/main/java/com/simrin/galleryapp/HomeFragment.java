@@ -6,10 +6,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -23,9 +23,15 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class HomeFragment extends Fragment{
 
-        private RecyclerView recyclerView;
-        private List<String> PhotoUrls;
-        private GridLayoutManager layoutManager;
+    private RecyclerView recyclerView;
+    private RecyclerViewAdapter myAdapter;
+    private List<String> PhotoUrls;
+    private GridLayoutManager layoutManager;
+    private Boolean isScrolling = true;
+    private int currentItems, totalItems, scrollOutItems, previousTotal=0;
+    private int viewThreshold=20;
+    private int pageNumber = 1;
+    private ProgressBar progressBar;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -37,50 +43,79 @@ public class HomeFragment extends Fragment{
         super.onActivityCreated(savedInstanceState);
 
         recyclerView = getView().findViewById(R.id.recyclerview);
+        progressBar = getView().findViewById(R.id.progress);
         PhotoUrls = new ArrayList<>();
-        getPhotos();
-        setuprecyclerview(PhotoUrls);
+        getPhotos(String.valueOf(pageNumber));
     }
 
-        private void getPhotos(){
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(API.BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
 
-            API api = retrofit.create(API.class);
+    private void getPhotos(String page){
+        progressBar.setVisibility(View.VISIBLE);
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(API.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-            Call<PhotoList> call = api.getPhoto("flickr.photos.getRecent", "20", "1",
-                    "6f102c62f41998d151e5a1b48713cf13","json","1","url_s");
+        API api = retrofit.create(API.class);
 
-            call.enqueue(new Callback<PhotoList>() {
-                @Override
-                public void onResponse(Call<PhotoList> call, Response<PhotoList> response) {
-                    PhotoList result = response.body();
-                    for (Photo photo: result.getPhotos().getPhoto()) {
-                        //Log.i("title", photo.getTitle());
-                        PhotoUrls.add(photo.getUrlS());
-                    }
 
-                    setuprecyclerview(PhotoUrls);
-                    Log.i("PhotoUrls", String.valueOf(PhotoUrls.get(0)));
-                    Log.i("PhotoUrls", String.valueOf(PhotoUrls.get(1)));
+        Call<PhotoList> call = api.getPhoto("flickr.photos.getRecent", "20", page,
+                "6f102c62f41998d151e5a1b48713cf13","json","1","url_s");
 
+        call.enqueue(new Callback<PhotoList>() {
+            @Override
+            public void onResponse(Call<PhotoList> call, Response<PhotoList> response) {
+                PhotoList result = response.body();
+                for (Photo photo: result.getPhotos().getPhoto()) {
+                    PhotoUrls.add(photo.getUrlS());
                 }
+                setuprecyclerview(PhotoUrls);
+                myAdapter.notifyDataSetChanged();
+                progressBar.setVisibility(View.GONE);
+            }
 
-                @Override
-                public void onFailure(Call<PhotoList> call, Throwable t) {
-                    Toast.makeText(getActivity(), "error", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+            @Override
+            public void onFailure(Call<PhotoList> call, Throwable t) {
+                Toast.makeText(getActivity(), "error", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
-        private void setuprecyclerview(List<String> photoUrls) {
-            RecyclerViewAdapter myAdapter = new RecyclerViewAdapter(getActivity(), photoUrls);
+    private void setuprecyclerview(List<String> photoUrls) {
+        if(myAdapter==null){
+            myAdapter = new RecyclerViewAdapter(getActivity(), photoUrls);
             layoutManager = new GridLayoutManager(getActivity(), 3);
             recyclerView.setHasFixedSize(true);
             recyclerView.setLayoutManager(layoutManager);
             recyclerView.setAdapter(myAdapter);
         }
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                currentItems = layoutManager.getChildCount();
+                totalItems = layoutManager.getItemCount();
+                scrollOutItems = layoutManager.findFirstVisibleItemPosition();
+
+                if(dy>0){
+                    if(isScrolling){
+                        if(totalItems>previousTotal){
+                            isScrolling=false;
+                            previousTotal=totalItems;
+                        }
+                    }
+                    if(!isScrolling&&(totalItems-currentItems)<=(scrollOutItems+viewThreshold)){
+                        isScrolling = true;
+                        Toast.makeText(getActivity(), "pageNumber " + String.valueOf(pageNumber), Toast.LENGTH_SHORT).show();
+                        if(pageNumber<3) {
+                            pageNumber++;
+                            getPhotos(String.valueOf(pageNumber));
+                        }
+                    }
+                }
+            }
+        });
+    }
 }
 
