@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +103,6 @@ public class HomeFragment extends Fragment{
                     }
                     if(!isScrolling&&(totalItems-currentItems)<=(scrollOutItems+viewThreshold)){
                         isScrolling = true;
-                        Toast.makeText(getActivity(), "pageNumber " + String.valueOf(pageNumber), Toast.LENGTH_SHORT).show();
                         if(pageNumber<3) {
                             pageNumber++;
                             getPhotos(String.valueOf(pageNumber));

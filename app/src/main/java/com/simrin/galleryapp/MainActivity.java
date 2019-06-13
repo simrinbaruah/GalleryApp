@@ -13,6 +13,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.TelephonyManager;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -21,6 +22,10 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     private Snackbar snackbar;
     private CoordinatorLayout layout;
     private boolean isConnected = true;
+    private boolean fastConnection = true;
+    private ConnectivityManager mConnectivityManager;
+    private NetworkInfo mNetworkInfo;
+
     private boolean monitoringConnectivity = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,10 +74,23 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         }
     };
 
+    private boolean checkFastConnection(){
+        if(isNetworkAvailable()) {
+            int subType = mNetworkInfo.getSubtype();
+            if (subType == TelephonyManager.NETWORK_TYPE_CDMA) {
+                fastConnection = false;
+                showSnackBar("Internet Not There", (CoordinatorLayout) findViewById(R.id.placeSnackbar));
+            } else {
+                fastConnection = true;
+            }
+        }
+        return fastConnection;
+    }
+
     private boolean isNetworkAvailable() {
         try {
-            ConnectivityManager mConnectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+            mConnectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+            mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
              isConnected = mNetworkInfo != null &&
                     mNetworkInfo.isConnectedOrConnecting();
             if (!isConnected) {
@@ -98,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                             @Override
                             public void onClick(View v) {
                                 snackbar.dismiss();
-                                if(!isNetworkAvailable()){
+                                if(!isNetworkAvailable() || !checkFastConnection()){
                                     showSnackBar("Internet Not There",(CoordinatorLayout) findViewById(R.id.placeSnackbar));
                                 }else{
                                     loadFragment(new HomeFragment());
