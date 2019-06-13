@@ -13,7 +13,6 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -61,13 +60,11 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         @Override
         public void onAvailable(Network network) {
             isConnected = true;
-            Log.i("INT", "INTERNET CONNECTED");
         }
 
         @Override
         public void onLost(Network network) {
             isConnected = false;
-            Log.i("INT", "INTERNET LOST");
             showSnackBar("Internet Not There",(CoordinatorLayout) findViewById(R.id.placeSnackbar));
         }
     };
@@ -79,10 +76,6 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
              isConnected = mNetworkInfo != null &&
                     mNetworkInfo.isConnectedOrConnecting();
             if (!isConnected) {
-                // SHOW ANY ACTION YOU WANT TO SHOW
-                // WHEN WE ARE NOT CONNECTED TO INTERNET/NETWORK
-                Log.i("INT", " NO NETWORK!");
-// if Network is not connected we will register a network callback to  monitor network
                 mConnectivityManager.registerNetworkCallback(
                         new NetworkRequest.Builder()
                                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)

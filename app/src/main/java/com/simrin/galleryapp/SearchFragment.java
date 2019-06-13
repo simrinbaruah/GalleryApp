@@ -7,17 +7,12 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,16 +26,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class SearchFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private RecyclerViewAdapter myAdapter;
-    private GridLayoutManager layoutManager;
-    private int currentItems, totalItems, scrollOutItems, previousTotal=0;
-    private int viewThreshold=20;
-    private int pageNumber = 1;
-    private Boolean isScrolling = true;
-    private ProgressBar progressBar;
     private List<String> PhotoUrls;
-    private List<String> mFilteredList;
-    String userInput;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -57,10 +44,7 @@ public class SearchFragment extends Fragment {
     }
 
     private void getPhotos(String userInput){
-        Log.i("query1", userInput);
-       // progressBar.setVisibility(View.VISIBLE);
         PhotoUrls.clear();
-        Log.i("query2", String.valueOf(PhotoUrls));
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(SearchAPI.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -82,8 +66,6 @@ public class SearchFragment extends Fragment {
                         PhotoUrls.add(photo.getUrlS());
                     }
                     setuprecyclerview(PhotoUrls);
-                    //myAdapter.notifyDataSetChanged();
-                    // progressBar.setVisibility(View.GONE);
                 }
             }
 
@@ -106,15 +88,12 @@ public class SearchFragment extends Fragment {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.i("query", query);
                 getPhotos(query);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                //getPhotos(newText);
-               // getFilter().filter(newText);
                 return false;
             }
 
@@ -122,8 +101,8 @@ public class SearchFragment extends Fragment {
     }
 
     private void setuprecyclerview(List<String> photoUrls) {
-        myAdapter = new RecyclerViewAdapter(getActivity(), photoUrls);
-        layoutManager = new GridLayoutManager(getActivity(), 3);
+        RecyclerViewAdapter myAdapter = new RecyclerViewAdapter(getActivity(), photoUrls);
+        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(myAdapter);
