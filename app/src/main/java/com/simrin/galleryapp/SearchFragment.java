@@ -40,6 +40,7 @@ public class SearchFragment extends Fragment {
     private ProgressBar progressBar;
     private List<String> PhotoUrls;
     private List<String> mFilteredList;
+    String userInput;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -53,11 +54,13 @@ public class SearchFragment extends Fragment {
 
         recyclerView = getView().findViewById(R.id.recyclerSearchView);
         PhotoUrls = new ArrayList<>();
-//        getPhotos();
     }
 
     private void getPhotos(String userInput){
+        Log.i("query1", userInput);
        // progressBar.setVisibility(View.VISIBLE);
+        PhotoUrls.clear();
+        Log.i("query2", String.valueOf(PhotoUrls));
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(SearchAPI.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -104,6 +107,7 @@ public class SearchFragment extends Fragment {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
+                Log.i("query", query);
                 getPhotos(query);
                 return true;
             }
@@ -124,66 +128,6 @@ public class SearchFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(myAdapter);
-//        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//
-//            @Override
-//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//                currentItems = layoutManager.getChildCount();
-//                totalItems = layoutManager.getItemCount();
-//                scrollOutItems = layoutManager.findFirstVisibleItemPosition();
-//
-//                if(dy>0){
-//                    if(isScrolling){
-//                        if(totalItems>previousTotal){
-//                            isScrolling=false;
-//                            previousTotal=totalItems;
-//                        }
-//                    }
-//                    if(!isScrolling&&(totalItems-currentItems)<=(scrollOutItems+viewThreshold)){
-//                        isScrolling = true;
-//                        Toast.makeText(getActivity(), "pageNumber " + String.valueOf(pageNumber), Toast.LENGTH_SHORT).show();
-//                        if(pageNumber<3) {
-//                            pageNumber++;
-//                            getPhotos(String.valueOf(pageNumber));
-//                        }
-//                    }
-//                }
-//            }
-//        });
     }
-
-//    @Override
-//    public Filter getFilter() {
-//        return new Filter(){
-//            @Override
-//            protected FilterResults performFiltering(CharSequence constraint) {
-//                String charString = constraint.toString();
-//
-//                if (charString.isEmpty()) {
-//
-//                    mFilteredList = PhotoUrls;
-//                } else {
-//                    List<String> filteredList = new ArrayList<>();
-//
-//                    for (String urls : PhotoUrls) {
-//                        filteredList.add(urls);
-//                    }
-//
-//                    mFilteredList = filteredList;
-//                }
-//
-//                FilterResults filterResults = new FilterResults();
-//                filterResults.values = mFilteredList;
-//                return filterResults;
-//            }
-//
-//            @Override
-//            protected void publishResults(CharSequence constraint, FilterResults results) {
-//                mFilteredList = (List<String>) results.values;
-//                myAdapter.notifyDataSetChanged();
-//            }
-//        };
-//    }
 }
 
